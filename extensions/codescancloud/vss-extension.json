@@ -146,33 +146,13 @@
       }
     },
     {
-      "id": "df2a63c9-977b-482b-ad3e-d8cd8d9b4642",
-      "type": "ms.vss-build.template",
-      "targets": [
-        "ms.vss-build.templates"
-      ],
-      "properties": {
-        "name": "templates/maven"
-      }
-    },
-    {
-      "id": "6c387b29-72e2-4344-8687-aa8bf50db4c8",
-      "type": "ms.vss-build.template",
-      "targets": [
-        "ms.vss-build.templates"
-      ],
-      "properties": {
-        "name": "templates/gradle"
-      }
-    },
-    {
       "id": "b8c99f95-9530-4f0b-b75f-32a9c7e196bb",
       "type": "ms.vss-build.template",
       "targets": [
         "ms.vss-build.templates"
       ],
       "properties": {
-        "name": "templates/main"
+        "name": "templates/salesforce"
       }
     }
   ]
