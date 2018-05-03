@@ -54,20 +54,15 @@ gulp.task('scanner:download', () => {
 
 gulp.task('scanner:copy', ['scanner:download'], () => {
   const scannerFolders = [
-    path.join(paths.build.extensions.sonarqubeTasks,  'prepare', 'old', 'SonarQubeScannerMsBuild'),
-    path.join(paths.build.extensions.sonarqubeTasks,  'prepare', 'new', 'classic-sonar-scanner-msbuild'),
-    path.join(paths.build.extensions.sonarcloudTasks, 'prepare', 'new', 'classic-sonar-scanner-msbuild')
+    path.join(paths.build.extensions.codescancloudTasks, 'prepare', 'new', 'classic-sonar-scanner-msbuild')
   ];
 
   const dotnetScannerFolders = [
-    path.join(paths.build.extensions.sonarqubeTasks,  'prepare', 'new', 'dotnet-sonar-scanner-msbuild'),
-    path.join(paths.build.extensions.sonarcloudTasks, 'prepare', 'new', 'dotnet-sonar-scanner-msbuild')
+    path.join(paths.build.extensions.codescancloudTasks, 'prepare', 'new', 'dotnet-sonar-scanner-msbuild')
   ];
 
   const cliFolders = [
-    path.join(paths.build.extensions.sonarqubeTasks,  'scanner-cli', 'old', 'sonar-scanner'),
-    path.join(paths.build.extensions.sonarqubeTasks,  'analyze',     'new', 'sonar-scanner'),
-    path.join(paths.build.extensions.sonarcloudTasks, 'analyze',     'new', 'sonar-scanner')
+    path.join(paths.build.extensions.codescancloudTasks, 'analyze',     'new', 'sonar-scanner')
   ];
   let scannerPipe = gulp.src(pathAllFiles(paths.build.classicScanner));
   scannerFolders.forEach(dir => {
@@ -87,21 +82,6 @@ gulp.task('scanner:copy', ['scanner:download'], () => {
   return es.merge(scannerPipe, dotnetScannerPipe, cliPipe);
 });
 
-gulp.task('tasks:old:copy', () =>
-  gulp.src(pathAllFiles(paths.extensions.tasks.old)).pipe(gulp.dest(paths.build.extensions.root))
-);
-
-gulp.task('tasks:old:common', () => {
-  let commonPipe = gulp.src(pathAllFiles(paths.common.old));
-  globby.sync(paths.extensions.tasks.old, { nodir: false }).forEach(dir => {
-    commonPipe = commonPipe.pipe(
-      gulp.dest(path.join(paths.build.extensions.root, path.relative(paths.extensions.root, dir)))
-    );
-  });
-  return commonPipe;
-});
-
-gulp.task('tasks:old:bundle', ['tasks:old:copy', 'tasks:old:common']);
 
 gulp.task('tasks:new:ts', ['npminstall'], () =>
   gulp
@@ -327,22 +307,8 @@ gulp.task('deploy:buildinfo', ['build'], () => {
     .auth(process.env.ARTIFACTORY_DEPLOY_USERNAME, process.env.ARTIFACTORY_DEPLOY_PASSWORD, true);
 });
 
-gulp.task('sonarqube', callback => {
-  if (process.env.TRAVIS_BRANCH === 'master' && process.env.TRAVIS_PULL_REQUEST === 'false') {
-    runSonnarQubeScanner(callback, { 'sonar.analysis.sha1': process.env.TRAVIS_COMMIT });
-  } else if (process.env.TRAVIS_PULL_REQUEST !== 'false') {
-    runSonnarQubeScanner(callback, {
-      'sonar.analysis.prNumber': process.env.TRAVIS_PULL_REQUEST,
-      'sonar.branch.name': process.env.TRAVIS_PULL_REQUEST_BRANCH,
-      'sonar.branch.target': process.env.TRAVIS_BRANCH,
-      'sonar.analysis.sha1': process.env.TRAVIS_PULL_REQUEST_SHA
-    });
-  }
-});
-
 gulp.task('copy', [
   'extension:copy',
-  'tasks:old:bundle',
   'tasks:new:bundle',
   'tasks:icons',
   'tasks:version',

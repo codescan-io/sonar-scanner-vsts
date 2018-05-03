@@ -21,7 +21,7 @@ export default class Task {
     endpoint: Endpoint,
     taskId: string,
     tries,
-    delay = 1000
+    delay = 5000
   ): Promise<Task> {
     tl.debug(`[SQ] Waiting for task '${taskId}' to complete.`);
     return getJSON(endpoint, `/api/ce/task`, { id: taskId }).then(

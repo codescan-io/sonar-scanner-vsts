@@ -8,7 +8,7 @@ Licensed under the [GNU Lesser General Public License, Version 3.0](http://www.g
 
 ## Marketplace
 
-https://marketplace.visualstudio.com/items?itemName=SonarSource.sonarqube
+https://marketplace.visualstudio.com/items?itemName=codescansf.sonarqube
 
 ## JIRA
 

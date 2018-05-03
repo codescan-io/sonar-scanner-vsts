@@ -12,7 +12,7 @@ export default async function prepareTask(endpoint: Endpoint, rootPath: string) 
 
   const props: { [key: string]: string } = {};
 
-  if (endpoint.type === EndpointType.SonarCloud) {
+  if (endpoint.type === EndpointType.CodeScanCloud) {
     await populateBranchAndPrProps(endpoint, props);
     tl.debug(`[SQ] Branch and PR parameters: ${JSON.stringify(props)}`);
   }
