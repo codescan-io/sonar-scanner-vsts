@@ -11,11 +11,8 @@ This extension provides the following features:
 * A **widget** to monitor the quality gate for your projects on your favorite VSTS dashboard
 
 ## Highlighted Features
-### Seamless Integration with .Net solutions
-The analysis of C# and VB. Net solution is really straightforward since it only requires adding the two **Prepare Analysis Configuration** and **Run Code Analysis** tasks to your build definition.
-
-### Easy setup for Maven and Gradle projects
-If you're doing Java, analyzing your source code is also very easy. It only requires adding the **Prepare Analysis Configuration** task, and check the **Run CodeScanCloud Analysis** option in the "Code Analysis" panel of the Maven or Gradle task.
+### Seamless Integration with Salesforce
+The analysis of Salesforce is really straightforward since it only requires adding the two **Prepare Analysis Configuration** and **Run Code Analysis** tasks to your build definition.
 
 ### Branch and Pull Request analysis
 Whatever type of source repository you are analysing, when a build is run on a branch of your project, the extension 
@@ -32,11 +29,6 @@ analyze the code changes and decorate the pull request with comments and overall
 "General Settings > Pull Requests" administration page of your project in CodeScanCloud.
 
 ### Quality Gate Status
-
-#### In a dashboard widget
-You can monintor the quality gate status of your projects in your favorite dashboard:
-
-![Quality Gate Widget](img/widget.png)
 
 #### In the build summary
 The **Publish Quality Gate Result** task waits for the analysis report to be consumed by the CodeScanCloud in order to flag the build job with the Quality Gate status. The Quality Gate is a major, out-of-the-box, feature of CodeScanCloud. It provides the ability to know at each analysis whether an application passes or fails the release criteria. In other words it tells you at every analysis whether an application is ready for production "quality-wise".

@@ -4,7 +4,7 @@
   "friendlyName": "Prepare Analysis Configuration",
   "description": "Prepare CodeScan Cloud analysis configuration",
   "helpMarkDown":
-    "[More Information](http://redirect.sonarsource.com/doc/install-configure-scanner-tfs-ts.html)",
+    "[More Information](https://www.code-scan.com/cloud/install-configure-scanner-tfs-ts/)",
   "category": "Build",
   "visibility": ["Build"],
   "author": "codescansf",
@@ -75,7 +75,7 @@
       "label": "Settings File",
       "required": false,
       "helpMarkDown":
-        "More information is available [here](http://redirect.sonarsource.com/doc/install-configure-scanner-tfs-ts.html)",
+        "More information is available [here](https://www.code-scan.com/cloud/install-configure-scanner-tfs-ts/)",
       "visibleRule": "scannerMode = CLI && configMode = file"
     },
     {
@@ -158,7 +158,7 @@
     {
       "target": "organization",
       "endpointId": "$(CodeScanCloud)",
-      "endpointUrl": "{{endpoint.url}}/api/organizations/search?member=true",
+      "endpointUrl": "{{endpoint.url}}api/organizations/search?member=true",
       "resultSelector": "jsonpath:$.organizations[*]",
       "resultTemplate":
         "{ \"Value\" : \"{{{key}}}\", \"DisplayValue\" : \"{{{name}}} ({{{key}}})\" }"

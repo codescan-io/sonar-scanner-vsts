@@ -4,7 +4,7 @@
   "friendlyName": "Run Code Analysis",
   "description": "Run scanner and upload the results to the CodeScan Cloud server.",
   "helpMarkDown":
-    "This task is not needed for Maven and Gradle projects since the scanner should be run as part of the build.\n\n[More Information](http://redirect.sonarsource.com/doc/install-configure-scanner-tfs-ts.html)",
+    "This task is not needed for Maven and Gradle projects since the scanner should be run as part of the build.\n\n[More Information](https://www.code-scan.com/cloud/install-configure-scanner-tfs-ts/)",
   "category": "Build",
   "visibility": ["Build"],
   "author": "codescansf",

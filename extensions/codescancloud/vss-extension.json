@@ -1,8 +1,8 @@
 {
   "manifestVersion": 1,
   "id": "codescan",
-  "name": "CodeScan",
-  "version": "1.2.1",
+  "name": "CodeScan Cloud",
+  "version": "1.2.12",
   "branding": {
     "color": "rgb(243, 243, 243)",
     "theme": "light"
@@ -94,37 +94,6 @@
       "targets": ["ms.vss-distributed-task.tasks"],
       "properties": {
         "name": "tasks/publish"
-      }
-    },
-    {
-      "id": "bd9cc4d1-5cfe-4480-b1c1-2a8dd071ee1e",
-      "type": "ms.vss-dashboards-web.widget",
-      "targets": ["ms.vss-dashboards-web.widget-catalog", ".8a514e37-6019-409a-8517-fe88b534f45a"],
-      "properties": {
-        "name": "Code Quality",
-        "description": "Shows the current quality status of your project based on CodeScanCloud.",
-        "catalogIconUrl:": "/integration/vsts/images/codescancloud-icon.png",
-        "previewImageUrl": "/integration/vsts/images/codescancloud-icon.png",
-        "uri":
-          "/integration/vsts/index.html?type=widget&contribution=bd9cc4d1-5cfe-4480-b1c1-2a8dd071ee1e",
-        "supportedSizes": [
-          {
-            "rowSpan": 1,
-            "columnSpan": 1
-          }
-        ],
-        "supportedScopes": ["project_team"]
-      }
-    },
-    {
-      "id": "8a514e37-6019-409a-8517-fe88b534f45a",
-      "type": "ms.vss-dashboards-web.widget-configuration",
-      "targets": ["ms.vss-dashboards-web.widget-configuration"],
-      "properties": {
-        "name": "Code Quality Configuration",
-        "description": "Configures Code Quality Widget",
-        "uri":
-          "/integration/vsts/index.html?type=configuration&contribution=8a514e37-6019-409a-8517-fe88b534f45a"
       }
     },
     {
