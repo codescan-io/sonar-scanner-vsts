@@ -46,9 +46,9 @@ export default class Scanner {
         );
         return Scanner.getScanner(rootPath);
       case ScannerMode.MSBuild:
-        return new ScannerMSBuild(rootPath);
+        return new ScannerMSBuild(rootPath, {});
       case ScannerMode.CLI:
-        return new ScannerCLI(rootPath);
+        return new ScannerCLI(rootPath, {});
       default:
         throw new Error(`[SQ] Unknown scanner mode: ${mode}`);
     }
@@ -64,7 +64,7 @@ interface ScannerCLIData {
 }
 
 export class ScannerCLI extends Scanner {
-  constructor(rootPath: string, private cliMode?: string, private data?: ScannerCLIData) {
+  constructor(rootPath: string, private readonly data: ScannerCLIData, private cliMode?: string) {
     super(rootPath, ScannerMode.CLI);
   }
 
@@ -82,7 +82,7 @@ export class ScannerCLI extends Scanner {
 
   public async runAnalysis() {
     let scannerCliScript = tl.resolve(this.rootPath, 'sonar-scanner', 'bin', 'sonar-scanner');
-    
+
     if (isWindows()) {
       scannerCliScript += '.bat';
     } else {
@@ -95,25 +95,29 @@ export class ScannerCLI extends Scanner {
   public static getScanner(rootPath: string) {
     const mode = tl.getInput('configMode');
     if (mode === 'file') {
-      return new ScannerCLI(rootPath, mode, { projectSettings: tl.getInput('configFile', true) });
+      return new ScannerCLI(rootPath, { projectSettings: tl.getInput('configFile', true) }, mode);
     }
-    return new ScannerCLI(rootPath, mode, {
-      projectKey: tl.getInput('cliProjectKey', true),
-      projectName: tl.getInput('cliProjectName'),
-      projectVersion: tl.getInput('cliProjectVersion'),
-      projectSources: tl.getInput('cliSources')
-    });
+    return new ScannerCLI(
+      rootPath,
+      {
+        projectKey: tl.getInput('cliProjectKey', true),
+        projectName: tl.getInput('cliProjectName'),
+        projectVersion: tl.getInput('cliProjectVersion'),
+        projectSources: tl.getInput('cliSources')
+      },
+      mode
+    );
   }
 }
 
 interface ScannerMSData {
-  projectKey: string;
+  projectKey?: string;
   projectName?: string;
   projectVersion?: string;
 }
 
 export class ScannerMSBuild extends Scanner {
-  constructor(rootPath: string, private data?: ScannerMSData) {
+  constructor(rootPath: string, private readonly data: ScannerMSData) {
     super(rootPath, ScannerMode.MSBuild);
   }
 
@@ -127,14 +131,14 @@ export class ScannerMSBuild extends Scanner {
 
   public async runPrepare() {
     let scannerRunner;
-    
+
     if (isWindows()) {
       const scannerExePath = this.findFrameworkScannerPath();
       tl.debug(`Using classic scanner at ${scannerExePath}`);
       tl.setVariable('SONARQUBE_SCANNER_MSBUILD_EXE', scannerExePath);
       scannerRunner = this.getScannerRunner(scannerExePath, true);
     } else {
-      const scannerDllPath = this.findDotnetScannerPath()
+      const scannerDllPath = this.findDotnetScannerPath();
       tl.debug(`Using dotnet scanner at ${scannerDllPath}`);
       tl.setVariable('SONARQUBE_SCANNER_MSBUILD_DLL', scannerDllPath);
       scannerRunner = this.getScannerRunner(scannerDllPath, false);
@@ -147,7 +151,7 @@ export class ScannerMSBuild extends Scanner {
     await scannerRunner.exec();
   }
 
-  private async makeShellScriptExecutable(scannerExecutablePath : string) {
+  private async makeShellScriptExecutable(scannerExecutablePath: string) {
     const scannerCliShellScripts = tl.findMatch(
       scannerExecutablePath,
       path.join(path.dirname(scannerExecutablePath), 'sonar-scanner-*', 'bin', 'sonar-scanner')
@@ -155,7 +159,7 @@ export class ScannerMSBuild extends Scanner {
     await fs.chmod(scannerCliShellScripts, '777');
   }
 
-  private getScannerRunner(scannerPath : string, isExeScanner : boolean) {
+  private getScannerRunner(scannerPath: string, isExeScanner: boolean) {
     if (isExeScanner) {
       return tl.tool(scannerPath);
     }
@@ -166,20 +170,12 @@ export class ScannerMSBuild extends Scanner {
     return scannerRunner;
   }
 
-  private findFrameworkScannerPath() : string {
-    return tl.resolve(
-      this.rootPath,
-      'classic-sonar-scanner-msbuild',
-      'SonarScanner.MSBuild.exe'
-    );
+  private findFrameworkScannerPath(): string {
+    return tl.resolve(this.rootPath, 'classic-sonar-scanner-msbuild', 'SonarScanner.MSBuild.exe');
   }
 
-  private findDotnetScannerPath() : string  {
-    return tl.resolve(
-      this.rootPath,
-      'dotnet-sonar-scanner-msbuild',
-      'SonarScanner.MSBuild.dll'
-    );
+  private findDotnetScannerPath(): string {
+    return tl.resolve(this.rootPath, 'dotnet-sonar-scanner-msbuild', 'SonarScanner.MSBuild.dll');
   }
 
   public async runAnalysis() {

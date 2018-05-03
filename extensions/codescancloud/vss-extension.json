@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "codescan",
   "name": "CodeScan",
-  "version": "1.1.22",
+  "version": "1.2.1",
   "branding": {
     "color": "rgb(243, 243, 243)",
     "theme": "light"
@@ -53,6 +53,7 @@
     "type": "git",
     "uri": "https://github.com/VillageChief/sonar-scanner-vsts"
   },
+  "baseUri": "https://app.codescan.io",
   "files": [
     {
       "path": "tasks"
@@ -64,6 +65,9 @@
     {
       "path": "icons",
       "addressable": true
+    },
+    {
+      "path": "templates"
     }
   ],
   "scopes": ["vso.build", "vso.code", "vso.test"],
@@ -90,6 +94,37 @@
       "targets": ["ms.vss-distributed-task.tasks"],
       "properties": {
         "name": "tasks/publish"
+      }
+    },
+    {
+      "id": "bd9cc4d1-5cfe-4480-b1c1-2a8dd071ee1e",
+      "type": "ms.vss-dashboards-web.widget",
+      "targets": ["ms.vss-dashboards-web.widget-catalog", ".8a514e37-6019-409a-8517-fe88b534f45a"],
+      "properties": {
+        "name": "Code Quality",
+        "description": "Shows the current quality status of your project based on CodeScanCloud.",
+        "catalogIconUrl:": "/integration/vsts/images/codescancloud-icon.png",
+        "previewImageUrl": "/integration/vsts/images/codescancloud-icon.png",
+        "uri":
+          "/integration/vsts/index.html?type=widget&contribution=bd9cc4d1-5cfe-4480-b1c1-2a8dd071ee1e",
+        "supportedSizes": [
+          {
+            "rowSpan": 1,
+            "columnSpan": 1
+          }
+        ],
+        "supportedScopes": ["project_team"]
+      }
+    },
+    {
+      "id": "8a514e37-6019-409a-8517-fe88b534f45a",
+      "type": "ms.vss-dashboards-web.widget-configuration",
+      "targets": ["ms.vss-dashboards-web.widget-configuration"],
+      "properties": {
+        "name": "Code Quality Configuration",
+        "description": "Configures Code Quality Widget",
+        "uri":
+          "/integration/vsts/index.html?type=configuration&contribution=8a514e37-6019-409a-8517-fe88b534f45a"
       }
     },
     {
@@ -139,6 +174,36 @@
         ],
         "helpMarkDown":
           "Go to <a href=\"https://app.codescan.io/account/security/\" target=\"_blank\">your CodeScan Cloud account security page</a> to generate a token."
+      }
+    },
+    {
+      "id": "df2a63c9-977b-482b-ad3e-d8cd8d9b4642",
+      "type": "ms.vss-build.template",
+      "targets": [
+        "ms.vss-build.templates"
+      ],
+      "properties": {
+        "name": "templates/maven"
+      }
+    },
+    {
+      "id": "6c387b29-72e2-4344-8687-aa8bf50db4c8",
+      "type": "ms.vss-build.template",
+      "targets": [
+        "ms.vss-build.templates"
+      ],
+      "properties": {
+        "name": "templates/gradle"
+      }
+    },
+    {
+      "id": "b8c99f95-9530-4f0b-b75f-32a9c7e196bb",
+      "type": "ms.vss-build.template",
+      "targets": [
+        "ms.vss-build.templates"
+      ],
+      "properties": {
+        "name": "templates/main"
       }
     }
   ]

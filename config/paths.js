@@ -28,7 +28,7 @@ exports.paths = {
       codescancloudTasks: path.join(buildPath, 'extensions', 'codescancloud', 'tasks')
     },
     classicScanner: path.join(buildPath, 'tmp', 'classic-sonar-scanner-msbuild'),
-    dotnetScanner:  path.join(buildPath, 'tmp', 'dotnet-sonar-scanner-msbuild')
+    dotnetScanner: path.join(buildPath, 'tmp', 'dotnet-sonar-scanner-msbuild')
   },
   common: {
     old: path.join(commonPath, 'powershell'),

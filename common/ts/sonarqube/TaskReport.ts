@@ -5,20 +5,22 @@ import * as tl from 'vsts-task-lib/task';
 export const REPORT_TASK_NAME = 'report-task.txt';
 
 interface ITaskReport {
-  projectKey: string;
   ceTaskId: string;
-  serverUrl: string;
-  dashboardUrl?: string;
   ceTaskUrl?: string;
+  dashboardUrl?: string;
+  projectKey: string;
+  serverUrl: string;
 }
 
 export default class TaskReport {
-  constructor(private report: ITaskReport) {
+  private readonly report: ITaskReport;
+  constructor(report: Partial<ITaskReport>) {
     for (const field of ['projectKey', 'ceTaskId', 'serverUrl']) {
-      if (!report[field]) {
+      if (!report[field as keyof ITaskReport]) {
         throw TaskReport.throwMissingField(field);
       }
     }
+    this.report = report as ITaskReport;
   }
 
   public get projectKey() {
@@ -37,44 +39,39 @@ export default class TaskReport {
     return this.report.dashboardUrl;
   }
 
-  public static findTaskFileReport(): string | undefined {
+  public static findTaskFileReport(): string[] {
     const taskReportGlob = path.join('**', REPORT_TASK_NAME);
     const taskReportGlobResult = tl.findMatch(
       tl.getVariable('Agent.BuildDirectory'),
       taskReportGlob
     );
     tl.debug(`[SQ] Searching for ${taskReportGlob} - found ${taskReportGlobResult.length} file(s)`);
-
-    if (taskReportGlobResult.length > 1) {
-      tl.warning(
-        `[SQ] Multiple '${REPORT_TASK_NAME}' files found. Choosing the first one. ` +
-          `The build summary may not be accurate. ` +
-          `Possible cause: multiple analyses during the same build, which is not supported.`
-      );
-    }
-
-    return taskReportGlobResult[0];
+    return taskReportGlobResult;
   }
 
-  public static createTaskReportFromFile(
-    filePath = TaskReport.findTaskFileReport()
-  ): Promise<TaskReport> {
-    if (!filePath) {
-      return Promise.reject(
-        TaskReport.throwInvalidReport(
-          `[SQ] Could not find '${REPORT_TASK_NAME}'.` +
-            ` Possible cause: the analysis did not complete successfully.`
-        )
-      );
-    }
-    tl.debug(`[SQ] Read Task report file: ${filePath}`);
-    return fs.access(filePath, fs.constants.R_OK).then(
-      () => this.parseReportFile(filePath),
-      err => {
-        return Promise.reject(
-          TaskReport.throwInvalidReport(`[SQ] Task report not found at: ${filePath}`)
+  public static createTaskReportsFromFiles(
+    filePaths = TaskReport.findTaskFileReport()
+  ): Promise<TaskReport[]> {
+    return Promise.all(
+      filePaths.map(filePath => {
+        if (!filePath) {
+          return Promise.reject(
+            TaskReport.throwInvalidReport(
+              `[SQ] Could not find '${REPORT_TASK_NAME}'.` +
+                ` Possible cause: the analysis did not complete successfully.`
+            )
+          );
+        }
+        tl.debug(`[SQ] Read Task report file: ${filePath}`);
+        return fs.access(filePath, fs.constants.R_OK).then(
+          () => this.parseReportFile(filePath),
+          () => {
+            return Promise.reject(
+              TaskReport.throwInvalidReport(`[SQ] Task report not found at: ${filePath}`)
+            );
+          }
         );
-      }
+      })
     );
   }
 
@@ -90,11 +87,11 @@ export default class TaskReport {
         try {
           const settings = TaskReport.createTaskReportFromString(fileContent);
           const taskReport = new TaskReport({
-            projectKey: settings.get('projectKey'),
-            serverUrl: settings.get('serverUrl'),
-            dashboardUrl: settings.get('dashboardUrl'),
             ceTaskId: settings.get('ceTaskId'),
-            ceTaskUrl: settings.get('ceTaskUrl')
+            ceTaskUrl: settings.get('ceTaskUrl'),
+            dashboardUrl: settings.get('dashboardUrl'),
+            projectKey: settings.get('projectKey'),
+            serverUrl: settings.get('serverUrl')
           });
           return Promise.resolve(taskReport);
         } catch (err) {

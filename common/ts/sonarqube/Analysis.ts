@@ -21,10 +21,11 @@ interface Condition {
 
 export default class Analysis {
   constructor(
-    private analysis: IAnalysis,
-    private endpointType: EndpointType,
-    private metrics?: Metrics,
-    private dashboardUrl?: string
+    private readonly analysis: IAnalysis,
+    private readonly endpointType: EndpointType,
+    private readonly dashboardUrl?: string,
+    private readonly metrics?: Metrics,
+    private readonly projectName?: string
   ) {}
 
   public get status() {
@@ -62,7 +63,7 @@ export default class Analysis {
       font-size: 12px;
       margin-left: 15px;`;
     return `<div style="padding-top: 8px;">
-      <span>Quality Gate</span>
+      <span>${this.projectName ? this.projectName + ' ' : ''}Quality Gate</span>
       <span style="${qgStyle}">
         ${formatMeasure(this.status, 'LEVEL')}
       </span>
@@ -76,7 +77,11 @@ export default class Analysis {
     }
 
     const rows = failedConditions.map(condition => {
-      const metric = this.metrics.getMetricByKey(condition.metricKey);
+      const metric = this.metrics && this.metrics.getMetricByKey(condition.metricKey);
+      if (!metric) {
+        return null;
+      }
+
       const threshold =
         condition.status === 'WARN' ? condition.warningThreshold : condition.errorThreshold;
       return `<tr>
@@ -129,16 +134,23 @@ export default class Analysis {
     }
   }
 
-  public static getAnalysis(
-    analysisId: string,
-    endpoint: Endpoint,
-    metrics?: Metrics,
-    dashboardUrl?: string
-  ): Promise<Analysis> {
+  public static getAnalysis({
+    analysisId,
+    projectName,
+    endpoint,
+    metrics,
+    dashboardUrl
+  }: {
+    analysisId: string;
+    dashboardUrl?: string;
+    endpoint: Endpoint;
+    projectName?: string;
+    metrics?: Metrics;
+  }): Promise<Analysis> {
     tl.debug(`[SQ] Retrieve Analysis id '${analysisId}.'`);
     return getJSON(endpoint, '/api/qualitygates/project_status', { analysisId }).then(
       ({ projectStatus }: { projectStatus: IAnalysis }) =>
-        new Analysis(projectStatus, endpoint.type, metrics, dashboardUrl),
+        new Analysis(projectStatus, endpoint.type, dashboardUrl, metrics, projectName),
       err => {
         if (err && err.message) {
           tl.error(`[SQ] Error retrieving analysis: ${err.message}`);

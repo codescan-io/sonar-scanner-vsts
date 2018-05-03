@@ -40,29 +40,38 @@ gulp.task('npminstall', () =>
 );
 
 gulp.task('scanner:download', () => {
-    const classicDownload = download(scanner.classicUrl)
-      .pipe(decompress())
-      .pipe(gulp.dest(paths.build.classicScanner));
+  const classicDownload = download(scanner.classicUrl)
+    .pipe(decompress())
+    .pipe(gulp.dest(paths.build.classicScanner));
 
-    const dotnetDownload = download(scanner.dotnetUrl)
-      .pipe(decompress())
-      .pipe(gulp.dest(paths.build.dotnetScanner));
+  const dotnetDownload = download(scanner.dotnetUrl)
+    .pipe(decompress())
+    .pipe(gulp.dest(paths.build.dotnetScanner));
 
-    return es.merge(classicDownload, dotnetDownload);
-  }
-);
+  return es.merge(classicDownload, dotnetDownload);
+});
 
 gulp.task('scanner:copy', ['scanner:download'], () => {
   const scannerFolders = [
-    path.join(paths.build.extensions.codescancloudTasks, 'prepare', 'new', 'classic-sonar-scanner-msbuild')
+    path.join(
+      paths.build.extensions.codescancloudTasks,
+      'prepare',
+      'new',
+      'classic-sonar-scanner-msbuild'
+    )
   ];
 
   const dotnetScannerFolders = [
-    path.join(paths.build.extensions.codescancloudTasks, 'prepare', 'new', 'dotnet-sonar-scanner-msbuild')
+    path.join(
+      paths.build.extensions.codescancloudTasks,
+      'prepare',
+      'new',
+      'dotnet-sonar-scanner-msbuild'
+    )
   ];
 
   const cliFolders = [
-    path.join(paths.build.extensions.codescancloudTasks, 'analyze',     'new', 'sonar-scanner')
+    path.join(paths.build.extensions.codescancloudTasks, 'analyze', 'new', 'sonar-scanner')
   ];
   let scannerPipe = gulp.src(pathAllFiles(paths.build.classicScanner));
   scannerFolders.forEach(dir => {
@@ -74,7 +83,9 @@ gulp.task('scanner:copy', ['scanner:download'], () => {
     dotnetScannerPipe = dotnetScannerPipe.pipe(gulp.dest(dir));
   });
 
-  let cliPipe = gulp.src(pathAllFiles(paths.build.classicScanner, `sonar-scanner-${scanner.cliVersion}`));
+  let cliPipe = gulp.src(
+    pathAllFiles(paths.build.classicScanner, `sonar-scanner-${scanner.cliVersion}`)
+  );
   cliFolders.forEach(dir => {
     cliPipe = cliPipe.pipe(gulp.dest(dir));
   });
@@ -194,7 +205,8 @@ gulp.task('extension:copy', () =>
         path.join(paths.extensions.root, '**', '@(vss-extension.json|extension-icon.png|*.md)')
       ),
       gulp.src(pathAllFiles(paths.extensions.root, '**', 'img')),
-      gulp.src(pathAllFiles(paths.extensions.root, '**', 'icons'))
+      gulp.src(pathAllFiles(paths.extensions.root, '**', 'icons')),
+      gulp.src(pathAllFiles(paths.extensions.root, '**', 'templates'))
     )
     .pipe(gulp.dest(paths.build.extensions.root))
 );
@@ -319,7 +331,7 @@ gulp.task('deploy', ['deploy:buildinfo', 'deploy:vsix']);
 
 gulp.task('test', ['extension:test', 'tasks:icons:test']);
 
-gulp.task('build', gulpSequence('copy', 'tfx'));
+gulp.task('build', gulpSequence('clean', 'copy', 'tfx'));
 
 gulp.task('build:test', gulpSequence('clean', 'copy', 'test', 'tfx:test'));
 
