@@ -53,6 +53,16 @@ export default class Scanner {
         throw new Error(`[SQ] Unknown scanner mode: ${mode}`);
     }
   }
+
+  logIssueOnBuildSummaryForStdErr(tool) {
+    tool.on('stderr', data => {
+      tl.command('task.logissue', { type: 'error' }, data);
+    });
+  }
+
+  isDebug() {
+    return tl.getVariable('system.debug') === 'true';
+  }
 }
 
 interface ScannerCLIData {
@@ -89,6 +99,10 @@ export class ScannerCLI extends Scanner {
       await fs.chmod(scannerCliScript, '777');
     }
     const scannerRunner = tl.tool(scannerCliScript);
+    this.logIssueOnBuildSummaryForStdErr(scannerRunner);
+    if (this.isDebug()) {
+      scannerRunner.arg('-X');
+    }
     await scannerRunner.exec();
   }
 
@@ -148,6 +162,10 @@ export class ScannerMSBuild extends Scanner {
     }
     scannerRunner.arg('begin');
     scannerRunner.arg('/k:' + this.data.projectKey);
+    this.logIssueOnBuildSummaryForStdErr(scannerRunner);
+    if (this.isDebug()) {
+      scannerRunner.arg('/d:sonar.verbose=true');
+    }
     await scannerRunner.exec();
   }
 
