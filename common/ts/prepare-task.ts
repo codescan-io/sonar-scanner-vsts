@@ -39,9 +39,9 @@ export default async function prepareTask(endpoint: Endpoint, rootPath: string) 
 
 async function populateBranchAndPrProps(props: { [key: string]: string }) {
   const collectionUrl = tl.getVariable('System.TeamFoundationCollectionUri');
-  const prId = tl.getVariable('System.PullRequest.PullRequestId');
+  //const prId = tl.getVariable('System.PullRequest.PullRequestId');
   const provider = tl.getVariable('Build.Repository.Provider');
-  if (prId) {
+  /*if (prId) {
     props['sonar.pullrequest.key'] = prId;
     props['sonar.pullrequest.base'] = branchName(tl.getVariable('System.PullRequest.TargetBranch'));
     props['sonar.pullrequest.branch'] = branchName(
@@ -60,13 +60,13 @@ async function populateBranchAndPrProps(props: { [key: string]: string }) {
       tl.warning(`Unkwnow provider '${provider}'`);
       props['sonar.scanner.skip'] = 'true';
     }
-  } else {
+  } else {*/
     const defaultBranch = await getDefaultBranch(provider, collectionUrl);
     const currentBranch = tl.getVariable('Build.SourceBranch');
     if (defaultBranch !== currentBranch) {
       props['sonar.branch.name'] = branchName(currentBranch);
     }
-  }
+  //}
 }
 
 function branchName(fullName: string) {
