@@ -1,8 +1,8 @@
-**[CodeScanCloud][sc]** is a tool for maintaining Code Quality in your Salesforce projects. It is a static source code analysis solution that enables continuous tracking of bugs, code smells and vulnerabilities for various Salesforce languages like Apex, VisualForce, Lightning, etc, ...
+**[CodeScan Cloud][sc]** is a tool for maintaining Code Quality in your Salesforce projects. It is a static source code analysis solution that enables continuous tracking of bugs, code smells and vulnerabilities for various Salesforce languages like Apex, VisualForce, Lightning, etc, ...
 
-## About the CodeScanCloud VSTS Marketplace Extension
+## About the CodeScan Cloud VSTS Marketplace Extension
 This extension provides the following features:
-* A dedicated **CodeScanCloud EndPoint** to set the user token and validate the connection.
+* A dedicated **CodeScan Cloud EndPoint** to set the user token and validate the connection.
 * Three build tasks to get your projects analyzed easily:
   * **Prepare Analysis Configuration** task, to configure all the required settings before executing the build. This task is mandatory. In case of .NET solutions or Java projects, this tasks helps to integrate seamlessly with MSBuild, Maven and Gradle tasks.
   * **Run Code Analysis** task, to actually execute the analysis of the source code. Not required for Maven or Gradle projects.
@@ -16,22 +16,14 @@ The analysis of Salesforce is really straightforward since it only requires addi
 
 ### Branch and Pull Request analysis
 Whatever type of source repository you are analysing, when a build is run on a branch of your project, the extension 
-automatically configures the analysis to be pushed to the relevant project branch on CodeScanCloud:
+automatically configures the analysis to be pushed to the relevant project branch on CodeScan Cloud:
 
 ![Branches](img/branches.png)
-
-If you configure your build definition as a build validation for pull requests of that project (this can be done on "Branch policies"), CodeScanCloud will also
-analyze the code changes and decorate the pull request with comments and overall status so that you can merge with confidence:
-
-![PR-Decoration](img/pull-request-decoration.png)
-
-**Important note**: to activate pull request decoration, you must specify a user token in the 
-"General Settings > Pull Requests" administration page of your project in CodeScanCloud.
 
 ### Quality Gate Status
 
 #### In the build summary
-The **Publish Quality Gate Result** task waits for the analysis report to be consumed by the CodeScanCloud in order to flag the build job with the Quality Gate status. The Quality Gate is a major, out-of-the-box, feature of CodeScanCloud. It provides the ability to know at each analysis whether an application passes or fails the release criteria. In other words it tells you at every analysis whether an application is ready for production "quality-wise".
+The **Publish Quality Gate Result** task waits for the analysis report to be consumed by the CodeScan Cloud in order to flag the build job with the Quality Gate status. The Quality Gate is a major, out-of-the-box, feature of CodeScan Cloud. It provides the ability to know at each analysis whether an application passes or fails the release criteria. In other words it tells you at every analysis whether an application is ready for production "quality-wise".
 
 Example of a passing Quality Gate:
 
