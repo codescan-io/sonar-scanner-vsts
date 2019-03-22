@@ -1,7 +1,7 @@
 {
   "name": "[Test] CodeScan Cloud",
   "id": "codescan2-test",
-  "public": false,
+  "public": true,
   "branding": {
     "color": "#ff0000",
     "theme": "dark"
