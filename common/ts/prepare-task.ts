@@ -1,3 +1,4 @@
+import * as semver from 'semver';
 import * as tl from 'vsts-task-lib/task';
 import * as vm from 'vso-node-api';
 import Endpoint, { EndpointType } from './sonarqube/Endpoint';
@@ -12,7 +13,7 @@ export default async function prepareTask(endpoint: Endpoint, rootPath: string) 
 
   const props: { [key: string]: string } = {};
 
-  if (endpoint.type === EndpointType.CodeScanCloud) {
+  if (await branchFeatureSupported(endpoint)) {
     await populateBranchAndPrProps(props);
     tl.debug(`[SQ] Branch and PR parameters: ${JSON.stringify(props)}`);
   }
@@ -42,7 +43,8 @@ async function populateBranchAndPrProps(props: { [key: string]: string }) {
   const prId = tl.getVariable('System.PullRequest.PullRequestId');
   const provider = tl.getVariable('Build.Repository.Provider');
   if (prId) {
-    /*props['sonar.pullrequest.key'] = prId;
+    /*
+    props['sonar.pullrequest.key'] = prId;
     props['sonar.pullrequest.base'] = branchName(tl.getVariable('System.PullRequest.TargetBranch'));
     props['sonar.pullrequest.branch'] = branchName(
       tl.getVariable('System.PullRequest.SourceBranch')
@@ -52,27 +54,43 @@ async function populateBranchAndPrProps(props: { [key: string]: string }) {
       props['sonar.pullrequest.vsts.instanceUrl'] = collectionUrl;
       props['sonar.pullrequest.vsts.project'] = tl.getVariable('System.TeamProject');
       props['sonar.pullrequest.vsts.repository'] = tl.getVariable(REPO_NAME_VAR);
-    } else if (provider === 'GitHub') {
+    } else if (provider === 'GitHub' || provider === 'GitHubEnterprise') {
       props['sonar.pullrequest.key'] = tl.getVariable('System.PullRequest.PullRequestNumber');
       props['sonar.pullrequest.provider'] = 'github';
       props['sonar.pullrequest.github.repository'] = tl.getVariable(REPO_NAME_VAR);
     } else {
-      tl.warning(`Unkwnow provider '${provider}'`);
+      tl.warning(`Unsupported PR provider '${provider}'`);
       props['sonar.scanner.skip'] = 'true';
-    }*/
+    }
+    */
     props['sonar.branch.name'] = branchName(tl.getVariable('System.PullRequest.SourceBranch'));
     props['sonar.branch.target'] = branchName(tl.getVariable('System.PullRequest.TargetBranch'));
     props['sonar.branch.type'] = 'short';
   } else {
-    const defaultBranch = await getDefaultBranch(provider, collectionUrl);
+    let isDefaultBranch = true;
     const currentBranch = tl.getVariable('Build.SourceBranch');
-    if (defaultBranch !== currentBranch) {
-      props['sonar.branch.name'] = branchName(currentBranch);
-      props['sonar.branch.target'] = branchName(defaultBranch);
+    if (provider === 'TfsGit') {
+      isDefaultBranch = currentBranch === (await getDefaultBranch(collectionUrl));
+    } else if (provider === 'Git' || provider === 'GitHub') {
+      // TODO for GitHub we should get the default branch configured on the repo
+      isDefaultBranch = currentBranch === 'refs/heads/master';
+    } else if (provider === 'Bitbucket') {
+      // TODO for Bitbucket Cloud we should get the main branch configured on the repo
+      // https://github.com/Microsoft/vsts-tasks/issues/7595
+      isDefaultBranch = currentBranch === 'master';
+    } else if (provider === 'Svn') {
+      isDefaultBranch = currentBranch === 'trunk';
+    }
+    if (!isDefaultBranch) {
+      // VSTS-165 don't use Build.SourceBranchName
+      props['sonar.branch.name'] = branchName(tl.getVariable('Build.SourceBranch'));
     }
   }
 }
 
+/**
+ * Waiting for https://github.com/Microsoft/vsts-tasks/issues/7591
+ */
 function branchName(fullName: string) {
   if (fullName.startsWith('refs/heads/')) {
     return fullName.substring('refs/heads/'.length);
@@ -81,14 +99,12 @@ function branchName(fullName: string) {
 }
 
 /**
- * Query the repo to get the full name of the default branch.
+ * Waiting for https://github.com/Microsoft/vsts-tasks/issues/7592
+ * query the repo to get the full name of the default branch.
  * @param collectionUrl
  */
-async function getDefaultBranch(provider: string, collectionUrl: string) {
+async function getDefaultBranch(collectionUrl: string) {
   const DEFAULT = 'refs/heads/master';
-  if (provider !== 'TfsGit') {
-    return DEFAULT;
-  }
   try {
     const vsts = getWebApi(collectionUrl);
     const gitApi = await vsts.getGitApi();

@@ -210,6 +210,7 @@ export class ScannerMSBuild extends Scanner {
       : this.getScannerRunner(tl.getVariable('SONARQUBE_SCANNER_MSBUILD_DLL'), false);
 
     scannerRunner.arg('end');
+    this.logIssueOnBuildSummaryForStdErr(scannerRunner);
     await scannerRunner.exec();
   }
 
