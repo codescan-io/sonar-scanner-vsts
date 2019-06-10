@@ -1,7 +1,6 @@
-import * as semver from 'semver';
 import * as tl from 'vsts-task-lib/task';
 import * as vm from 'vso-node-api';
-import Endpoint, { EndpointType } from './sonarqube/Endpoint';
+import Endpoint from './sonarqube/Endpoint';
 import Scanner, { ScannerMode } from './sonarqube/Scanner';
 import { toCleanJSON } from './helpers/utils';
 
@@ -13,10 +12,8 @@ export default async function prepareTask(endpoint: Endpoint, rootPath: string) 
 
   const props: { [key: string]: string } = {};
 
-  if (await branchFeatureSupported(endpoint)) {
-    await populateBranchAndPrProps(props);
-    tl.debug(`[SQ] Branch and PR parameters: ${JSON.stringify(props)}`);
-  }
+  await populateBranchAndPrProps(props);
+  tl.debug(`[SQ] Branch and PR parameters: ${JSON.stringify(props)}`);
 
   tl
     .getDelimitedInput('extraProperties', '\n')
@@ -67,23 +64,28 @@ async function populateBranchAndPrProps(props: { [key: string]: string }) {
     props['sonar.branch.target'] = branchName(tl.getVariable('System.PullRequest.TargetBranch'));
     props['sonar.branch.type'] = 'short';
   } else {
-    let isDefaultBranch = true;
-    const currentBranch = tl.getVariable('Build.SourceBranch');
+    let defaultBranch;
     if (provider === 'TfsGit') {
-      isDefaultBranch = currentBranch === (await getDefaultBranch(collectionUrl));
+      defaultBranch = (await getDefaultBranch(collectionUrl));
     } else if (provider === 'Git' || provider === 'GitHub') {
       // TODO for GitHub we should get the default branch configured on the repo
-      isDefaultBranch = currentBranch === 'refs/heads/master';
+      defaultBranch = 'refs/heads/master';
     } else if (provider === 'Bitbucket') {
       // TODO for Bitbucket Cloud we should get the main branch configured on the repo
       // https://github.com/Microsoft/vsts-tasks/issues/7595
-      isDefaultBranch = currentBranch === 'master';
+      defaultBranch = 'master';
     } else if (provider === 'Svn') {
-      isDefaultBranch = currentBranch === 'trunk';
+      defaultBranch = 'trunk';
     }
-    if (!isDefaultBranch) {
+
+    const currentBranch = tl.getVariable('Build.SourceBranch');
+    if (currentBranch === defaultBranch) {
+      props['sonar.branch.name'] = branchName(currentBranch);
+    }else{
       // VSTS-165 don't use Build.SourceBranchName
-      props['sonar.branch.name'] = branchName(tl.getVariable('Build.SourceBranch'));
+      props['sonar.branch.name'] = branchName(currentBranch);
+      props['sonar.branch.target'] = branchName(defaultBranch);
+      props['sonar.branch.type'] = 'long';
     }
   }
 }

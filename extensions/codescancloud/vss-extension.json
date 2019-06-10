@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "codescan",
   "name": "CodeScan Cloud",
-  "version": "1.6.3",
+  "version": "1.6.5",
   "branding": {
     "color": "rgb(243, 243, 243)",
     "theme": "light"
