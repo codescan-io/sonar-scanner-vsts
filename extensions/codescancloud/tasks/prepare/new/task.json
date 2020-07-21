@@ -129,6 +129,13 @@
       "visibleRule": "scannerMode = MSBuild"
     },
     {
+      "name": "targetBranchName",
+      "type": "string",
+      "label": "Target branch name",
+      "defaultValue": "master",
+      "helpMarkDown": "Specify the target branch name, for example: ```develop```, otherwise the default repo branch will be used."
+    },
+    {
       "name": "cliSources",
       "type": "filePath",
       "label": "Sources directory root",

@@ -78,6 +78,10 @@ async function populateBranchAndPrProps(props: { [key: string]: string }) {
       defaultBranch = 'trunk';
     }
 
+    if (tl.getInput('targetBranchName')) {
+      defaultBranch = tl.getInput('targetBranchName');
+    }
+
     const currentBranch = tl.getVariable('Build.SourceBranch');
     if (currentBranch === defaultBranch) {
       props['sonar.branch.name'] = branchName(currentBranch);
