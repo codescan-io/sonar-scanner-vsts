@@ -40,7 +40,6 @@ async function populateBranchAndPrProps(props: { [key: string]: string }) {
   const prId = tl.getVariable('System.PullRequest.PullRequestId');
   const provider = tl.getVariable('Build.Repository.Provider');
   if (prId) {
-    /*
     props['sonar.pullrequest.key'] = prId;
     props['sonar.pullrequest.base'] = branchName(tl.getVariable('System.PullRequest.TargetBranch'));
     props['sonar.pullrequest.branch'] = branchName(
@@ -55,37 +54,29 @@ async function populateBranchAndPrProps(props: { [key: string]: string }) {
       props['sonar.pullrequest.key'] = tl.getVariable('System.PullRequest.PullRequestNumber');
       props['sonar.pullrequest.provider'] = 'github';
       props['sonar.pullrequest.github.repository'] = tl.getVariable(REPO_NAME_VAR);
+    } else if (provider === "Bitbucket") {
+      props["sonar.pullrequest.provider"] = "bitbucketcloud";
     } else {
       tl.warning(`Unsupported PR provider '${provider}'`);
       props['sonar.scanner.skip'] = 'true';
     }
-    */
-    props['sonar.branch.name'] = branchName(tl.getVariable('System.PullRequest.SourceBranch'));
-    props['sonar.branch.target'] = branchName(tl.getVariable('System.PullRequest.TargetBranch'));
-    props['sonar.branch.type'] = 'short';
   } else {
-    let defaultBranch;
-    if (provider === 'TfsGit') {
-      defaultBranch = (await getDefaultBranch(collectionUrl));
-    } else if (provider === 'Git' || provider === 'GitHub') {
+    let isDefaultBranch = true;
+    const currentBranch = tl.getVariable("Build.SourceBranch");
+    if (provider === "TfsGit") {
+      isDefaultBranch = currentBranch === (await getDefaultBranch(collectionUrl));
+    } else if (provider === "Git" || provider === "GitHub" || provider === "GitHubEnterprise") {
       // TODO for GitHub we should get the default branch configured on the repo
-      defaultBranch = 'refs/heads/master';
-    } else if (provider === 'Bitbucket') {
+      isDefaultBranch = currentBranch === "refs/heads/master";
+    } else if (provider === "Bitbucket") {
       // TODO for Bitbucket Cloud we should get the main branch configured on the repo
-      // https://github.com/Microsoft/vsts-tasks/issues/7595
-      defaultBranch = 'master';
-    } else if (provider === 'Svn') {
-      defaultBranch = 'trunk';
+      isDefaultBranch = currentBranch === "refs/heads/master";
+    } else if (provider === "Svn") {
+      isDefaultBranch = currentBranch === "trunk";
     }
-
-    const currentBranch = tl.getVariable('Build.SourceBranch');
-    if (currentBranch === defaultBranch) {
-      props['sonar.branch.name'] = branchName(currentBranch);
-    }else{
+    if (!isDefaultBranch) {
       // VSTS-165 don't use Build.SourceBranchName
-      props['sonar.branch.name'] = branchName(currentBranch);
-      props['sonar.branch.target'] = branchName(defaultBranch);
-      props['sonar.branch.type'] = 'long';
+      props["sonar.branch.name"] = branchName(tl.getVariable("Build.SourceBranch"));
     }
   }
 }
